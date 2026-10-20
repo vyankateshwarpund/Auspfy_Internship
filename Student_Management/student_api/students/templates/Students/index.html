@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="/static/students/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Student Management System</h1>
+
+        <div class="form-box">
+            <h2>Add Student</h2>
+
+            <form id="studentForm">
+                <input type="hidden" id="studentId">
+
+                <input type="text" id="name" placeholder="Student Name" required>
+                <input type="text" id="class_name" placeholder="Class" required>
+                <input type="text" id="branch" placeholder="Branch" required>
+                <input type="number" id="roll" placeholder="Roll Number" required>
+                <input type="text" id="city" placeholder="City" required>
+
+                <div class="form-buttons">
+    <button type="submit" id="submitBtn">Add Student</button>
+    <button type="button" id="cancelBtn">Cancel</button>
+            </div>
+            </form>
+        </div>
+
+        <div class="student-box">
+            <h2>Student Records</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Branch</th>
+                        <th>Roll</th>
+                        <th>City</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody id="studentTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/static/students/script.js"></script>
+</body>
+</html>

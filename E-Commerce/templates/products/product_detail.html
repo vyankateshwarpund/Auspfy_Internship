@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Auspify Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'products:home' %}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}" class="text-decoration-none">Products</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:category_products' product.category.slug %}" class="text-decoration-none">{{ product.category.name }}</a></li>
+            <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 250px;">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Product Overview Card -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5">
+        <div class="row g-0">
+            <!-- Product Image -->
+            <div class="col-lg-6 bg-light d-flex align-items-center justify-content-center p-4">
+                <div class="position-relative w-100" style="max-width: 500px; height: 400px;">
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" class="w-100 h-100 object-fit-contain rounded-3 shadow-sm bg-white">
+                </div>
+            </div>
+
+            <!-- Product Details & Actions -->
+            <div class="col-lg-6 p-4 p-md-5 d-flex flex-column justify-content-between">
+                <div>
+                    <!-- Category & SKU Badges -->
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <a href="{% url 'products:category_products' product.category.slug %}" class="badge bg-primary-subtle text-primary text-decoration-none">
+                            {{ product.category.name }}
+                        </a>
+                        <span class="badge bg-secondary-subtle text-secondary">
+                            SKU: {{ product.sku }}
+                        </span>
+                    </div>
+
+                    <!-- Title -->
+                    <h2 class="fw-bold mb-3">{{ product.name }}</h2>
+
+                    <!-- Price & Stock Status -->
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <span class="display-6 fw-bold text-primary">₹{{ product.price }}</span>
+                        {% if not product.is_in_stock %}
+                            <span class="badge bg-danger fs-6 px-3 py-2">Out of Stock</span>
+                        {% elif product.stock < 5 %}
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2">Low Stock ({{ product.stock }} remaining)</span>
+                        {% else %}
+                            <span class="badge bg-success fs-6 px-3 py-2"><i class="bi bi-check-circle me-1"></i> In Stock ({{ product.stock }} available)</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Short Description -->
+                    <div class="mb-4 text-muted">
+                        <p class="lead fs-6">{{ product.description }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Controls: Quantity & Add to Cart -->
+                <div class="pt-4 border-top">
+                    {% if product.is_in_stock %}
+                        <div class="row g-3 align-items-center mb-3">
+                            <div class="col-auto">
+                                <label class="form-label small fw-semibold text-muted mb-0">Quantity:</label>
+                            </div>
+                            <div class="col-auto">
+                                <div class="quantity-control">
+                                    <button type="button" onclick="adjustDetailQty(-1)"><i class="bi bi-dash"></i></button>
+                                    <input type="number" id="product-quantity-input" value="1" min="1" max="{{ product.stock }}" readonly>
+                                    <button type="button" onclick="adjustDetailQty(1)"><i class="bi bi-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <button class="btn btn-primary btn-lg px-4 flex-grow-1 shadow-sm" data-add-to-cart data-product-id="{{ product.id }}">
+                                <i class="bi bi-cart-plus-fill me-2"></i> Add to Cart
+                            </button>
+                            <a href="{% url 'cart:cart_view' %}" class="btn btn-outline-secondary btn-lg px-3" title="View Cart">
+                                <i class="bi bi-cart3"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-danger mb-0" role="alert">
+                            <i class="bi bi-exclamation-octagon-fill me-2"></i> This product is currently out of stock. Please check back later!
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Products -->
+    {% if related_products %}
+        <div class="mb-5">
+            <h4 class="fw-bold mb-4">Related in {{ product.category.name }}</h4>
+            <div class="row g-3">
+                {% for related in related_products %}
+                    <div class="col-lg-3 col-md-4 col-sm-6">
+                        <div class="card h-100 border-0 shadow-sm product-card rounded-3">
+                            <a href="{% url 'products:product_detail' related.slug %}" class="product-img-wrapper rounded-top text-decoration-none">
+                                <img src="{{ related.image_url }}" alt="{{ related.name }}" loading="lazy">
+                            </a>
+                            <div class="card-body d-flex flex-column p-3">
+                                <h6 class="card-title mb-1">
+                                    <a href="{% url 'products:product_detail' related.slug %}" class="text-dark text-decoration-none text-truncate d-block">
+                                        {{ related.name }}
+                                    </a>
+                                </h6>
+                                <span class="fw-bold text-primary mt-auto">₹{{ related.price }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function adjustDetailQty(delta) {
+    const input = document.getElementById('product-quantity-input');
+    if (!input) return;
+    let current = parseInt(input.value, 10) || 1;
+    let max = parseInt(input.getAttribute('max'), 10) || 999;
+    let nextVal = current + delta;
+    if (nextVal >= 1 && nextVal <= max) {
+        input.value = nextVal;
+    }
+}
+</script>
+{% endblock %}

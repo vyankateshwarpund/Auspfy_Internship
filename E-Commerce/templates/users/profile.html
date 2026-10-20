@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - Auspify Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'products:home' %}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">User Profile</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 text-center p-4 mb-4">
+                <div class="mx-auto mb-3">
+                    <span class="rounded-circle bg-primary text-white d-inline-flex justify-content-center align-items-center fs-2 shadow-sm" style="width: 80px; height: 80px;">
+                        {{ user.username|make_list|first|upper }}
+                    </span>
+                </div>
+                <h5 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h5>
+                <p class="text-muted small mb-3">{{ user.email }}</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'orders:order_list' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-box-seam me-1"></i> View Order History
+                    </a>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4 p-3">
+                <div class="list-group list-group-flush border-0">
+                    <a href="{% url 'users:profile' %}" class="list-group-item list-group-item-action border-0 active rounded">
+                        <i class="bi bi-person me-2"></i> Account Details & Address
+                    </a>
+                    <a href="{% url 'orders:order_list' %}" class="list-group-item list-group-item-action border-0">
+                        <i class="bi bi-bag-check me-2"></i> My Orders
+                    </a>
+                    <a href="{% url 'cart:cart_view' %}" class="list-group-item list-group-item-action border-0">
+                        <i class="bi bi-cart3 me-2"></i> Shopping Cart
+                    </a>
+                    <a href="{% url 'users:logout' %}" class="list-group-item list-group-item-action border-0 text-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Form Main Content -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+                <h4 class="fw-bold mb-4 d-flex align-items-center">
+                    <i class="bi bi-pencil-square text-primary me-2"></i> Personal Information & Address
+                </h4>
+
+                <form method="POST" action="{% url 'users:profile' %}">
+                    {% csrf_token %}
+                    <h6 class="text-uppercase small fw-bold text-muted mb-3">Personal Details</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">First Name</label>
+                            <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Last Name</label>
+                            <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Username</label>
+                            <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <input type="email" name="email" class="form-control" value="{{ user.email }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Contact Phone</label>
+                            <input type="text" name="phone_number" class="form-control" placeholder="+91 9876543210" value="{{ profile.phone_number }}">
+                        </div>
+                    </div>
+
+                    <h6 class="text-uppercase small fw-bold text-muted mb-3 pt-3 border-top">Default Shipping Address</h6>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Street Address Line 1</label>
+                            <input type="text" name="address_line_1" class="form-control" placeholder="Flat, House no., Building, Street" value="{{ profile.address_line_1 }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Street Address Line 2</label>
+                            <input type="text" name="address_line_2" class="form-control" placeholder="Area, Landmark (Optional)" value="{{ profile.address_line_2 }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">City</label>
+                            <input type="text" name="city" class="form-control" placeholder="City" value="{{ profile.city }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">State</label>
+                            <input type="text" name="state" class="form-control" placeholder="State" value="{{ profile.state }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">Postal / ZIP Code</label>
+                            <input type="text" name="postal_code" class="form-control" placeholder="e.g. 400001" value="{{ profile.postal_code }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Country</label>
+                            <input type="text" name="country" class="form-control" value="{{ profile.country|default:'India' }}">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end pt-3 border-top">
+                        <button type="submit" class="btn btn-primary px-4 shadow-sm">
+                            <i class="bi bi-save me-1"></i> Save Profile Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

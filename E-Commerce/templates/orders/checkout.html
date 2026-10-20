@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Auspify Shop{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a href="{% url 'products:home' %}" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'cart:cart_view' %}" class="text-decoration-none">Cart</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Checkout</li>
+        </ol>
+    </nav>
+
+    <h3 class="fw-bold mb-4 d-flex align-items-center">
+        <i class="bi bi-shield-check text-primary me-2"></i> Complete Your Order
+    </h3>
+
+    <form method="POST" action="{% url 'orders:checkout' %}">
+        {% csrf_token %}
+        <div class="row g-4">
+            <!-- Shipping Information Form -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center">
+                        <i class="bi bi-geo-alt-fill text-danger me-2"></i> Shipping & Contact Details
+                    </h5>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Recipient Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="full_name" class="form-control" required value="{{ user.get_full_name|default:user.username }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" name="email" class="form-control" required value="{{ user.email }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Phone Number <span class="text-danger">*</span></label>
+                            <input type="text" name="phone_number" class="form-control" placeholder="+91 9876543210" required value="{{ profile.phone_number }}">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-semibold">Delivery Address <span class="text-danger">*</span></label>
+                            <input type="text" name="shipping_address" class="form-control" placeholder="House/Flat No., Building Name, Street" required value="{{ profile.address_line_1 }}">
+                        </div>
+
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold">City <span class="text-danger">*</span></label>
+                            <input type="text" name="city" class="form-control" required value="{{ profile.city }}">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold">State <span class="text-danger">*</span></label>
+                            <input type="text" name="state" class="form-control" required value="{{ profile.state }}">
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">Postal Code <span class="text-danger">*</span></label>
+                            <input type="text" name="postal_code" class="form-control" placeholder="400001" required value="{{ profile.postal_code }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method Card -->
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold mb-3 d-flex align-items-center">
+                        <i class="bi bi-wallet2 text-success me-2"></i> Payment Method
+                    </h5>
+
+                    <div class="form-check p-3 border rounded-3 bg-light d-flex align-items-center">
+                        <input class="form-check-input ms-0 me-3" type="radio" name="payment_method" id="codPayment" value="Cash on Delivery" checked>
+                        <label class="form-check-label w-100" for="codPayment">
+                            <span class="d-block fw-bold text-dark">Cash on Delivery (COD)</span>
+                            <small class="text-muted">Pay securely with cash or UPI directly when your package arrives at your doorstep.</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Review Sidebar -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold mb-3">Order Items ({{ cart.total_items }})</h5>
+
+                    <div class="overflow-auto mb-3" style="max-height: 280px;">
+                        {% for item in items %}
+                            <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="rounded me-2" style="width: 45px; height: 45px; object-fit: cover;">
+                                    <div>
+                                        <h6 class="mb-0 text-truncate" style="max-width: 170px;">{{ item.product.name }}</h6>
+                                        <small class="text-muted">Qty: {{ item.quantity }} × ₹{{ item.product.price }}</small>
+                                    </div>
+                                </div>
+                                <span class="fw-bold">₹{{ item.subtotal }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="fw-semibold">₹{{ cart.total_price }}</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Shipping Fee</span>
+                        <span class="badge bg-success-subtle text-success">FREE</span>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fs-5 fw-bold">Total to Pay</span>
+                        <span class="fs-4 fw-bold text-primary">₹{{ cart.total_price }}</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm py-3">
+                        <i class="bi bi-bag-check-fill me-2"></i> Place Order (Cash on Delivery)
+                    </button>
+
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            <i class="bi bi-lock-fill me-1"></i> By placing your order, you agree to Auspify Shop Terms of Service.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
